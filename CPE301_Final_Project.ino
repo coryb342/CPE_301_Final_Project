@@ -1,6 +1,22 @@
 //Cory Bateman
 //Final Project
 
+//----My Pins----
+// --Outputs--
+//  -LEDS-
+//Green LED (Digital Pin 13, PB7)
+//Yellow LED (Digital Pin 12, PB6)
+//Red LED (Digital Pin 11, PB5)
+//Blue LED (Digital Pin 10, PB4)
+volatile unsigned char* port_b = (unsigned char*) 0x25; 
+volatile unsigned char* ddr_b  = (unsigned char*) 0x24; 
+volatile unsigned char* pin_b  = (unsigned char*) 0x23; 
+
+//  -Motors- 
+
+
+
+
 //My Delay Params
 volatile unsigned char *myTCCR1A = (unsigned char *) 0x80;
 volatile unsigned char *myTCCR1B = (unsigned char *) 0x81;
@@ -23,6 +39,9 @@ volatile unsigned char *portB = (unsigned char *) 0x25;
 void setup() {
   //Initialize Serial Port
   U0init(9600);
+  
+  //Set all LEDs to Output Mode
+  *port_b |= 11110000;
 }
 
 
