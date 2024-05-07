@@ -111,14 +111,16 @@ void setup() {
   //Set up LCD
   lcd.begin(16, 2);
   lcd.setCursor(0, 0);
-
-
+  //Set Fan Motor pin to Output
+  *port_l |= 0b01000000;
+  //Set up AttachInterrupt
+  attachInterrupt(digitalPinToInterrupt(2), startUpISR, HIGH);
 }
 
 
 
 void loop() {
-  // Starts in disabled mode
+  // Starts in off mode
   //Disabled Mode = yellow led on. No display, no fan. 
   // Wait for start button via ISR, Switch to Idle mode. 
   //Idle mode:
