@@ -21,22 +21,35 @@ volatile unsigned char* ddr_b  = (unsigned char*) 0x24;
 volatile unsigned char* pin_b  = (unsigned char*) 0x23; 
 
 //  -Motors- 
-//Stepper
-//Fan
 
+//Stepper (Digital pins 47, 49, 51, 53)
+const int stepsPerRevolution = 2038;
+Stepper vent = Stepper(stepsPerRevolution, 47, 49, 51, 53);
+
+//Fan (Digital Pin 43, PL6)
+volatile unsigned char* port_l = (unsigned char*) 0x10B; 
+volatile unsigned char* ddr_l  = (unsigned char*) 0x10A; 
+volatile unsigned char* pin_l  = (unsigned char*) 0x109;
 
 // --Inputs--
-//  -Buttons-
+
 //Start (Digital pin 2, PE4)
 //Stop (Digital pin 3, PE5)
-//Reset (Digital pin 18, PD3)
 volatile unsigned char* port_e = (unsigned char*) 0x2E; 
 volatile unsigned char* ddr_e  = (unsigned char*) 0x2D; 
 volatile unsigned char* pin_e  = (unsigned char*) 0x2C; 
 
+//Reset (Digital pin 18, PD3)
 volatile unsigned char* port_d = (unsigned char*) 0x2B; 
 volatile unsigned char* ddr_d  = (unsigned char*) 0x2A; 
-volatile unsigned char* pin_d  = (unsigned char*) 0x29; 
+volatile unsigned char* pin_d  = (unsigned char*) 0x29;
+
+//Potentiometer (Analog pin 0, A0)
+const int potentiometer = 0;
+
+//Water Level Sensor (Analog pin 1, A1)
+const int waterLevel = 1;
+
 //  -Temp/Humidity-
 dht DHT;
 #define DHT11_PIN 22
