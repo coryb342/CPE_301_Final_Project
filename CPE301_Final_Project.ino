@@ -150,3 +150,25 @@ void U0putchar(unsigned char U0pdata)
   while(!(*myUCSR0A & TBE));
   *myUDR0 = U0pdata;
 }
+
+//Helper Functions
+
+void printTempAndHumidityToLcd(int DHTpin, LiquidCrystal lcd){
+  int chk = DHT.read11(DHTpin);
+  lcd.clear();
+  lcd.setCursor(0,0); 
+  lcd.print("Temp: ");
+  lcd.print(DHT.temperature);
+  lcd.print((char)223);
+  lcd.print("C");
+  lcd.setCursor(0,1);
+  lcd.print("Humidity: ");
+  lcd.print(DHT.humidity);
+  lcd.print("%");
+}
+
+void updateTempAndHumidity(int DHTpin, int& temp, int& humidity){
+  int chk = DHT.read(DHTpin);
+  temp = DHT.temperature;
+  humidity = DHT.humidity;
+}
