@@ -146,21 +146,14 @@ void loop() {
 //Delay Function
 void my_delay(unsigned int ticks)
 {
-  // stop the timer
   *myTCCR1B &= 0xF8;
-  // set the counts
   *myTCNT1 = (unsigned int) (65536 - ticks);
-  // start the timer
   * myTCCR1A = 0x0;
   * myTCCR1B |= 0b00000001;
-  // wait for overflow
-  while((*myTIFR1 & 0x01)==0); // 0b 0000 0000
-  // stop the timer
-  *myTCCR1B &= 0xF8;   // 0b 0000 0000
-  // reset TOV           
+  while((*myTIFR1 & 0x01)==0);
+  *myTCCR1B &= 0xF8;
   *myTIFR1 |= 0x01;
 }
-
 
 //Serial Functions
 void U0init(unsigned long U0baud)
@@ -243,4 +236,102 @@ void updateTempAndHumidity(int DHTpin, int& temp, int& humidity){
   int chk = DHT.read(DHTpin);
   temp = DHT.temperature;
   humidity = DHT.humidity;
+}
+
+void moveVent(int analogPin, int currentPosition, Stepper vent){
+  
+  if(adc_read(analogPin) < currentPosition){
+    vent.step(-100);
+    return;
+  }else if(adc_read(analogPin) > currentPosition){
+    vent.step(100);
+    return;
+  }else{
+    return;
+  }
+}
+
+bool isWaterLow(int analogPin){
+  if(adc_read(analogPin) < 300){
+    return true;
+  }
+  return false;
+}
+
+void printErrorToLcd(LiquidCrystal lcd){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Water Level Low!");
+}
+
+bool isTimeToUpdate(long currMillis, long& previousMillis, long interval){
+  if(currMillis - previousMillis >= interval){
+    previousMillis = currMillis;
+    return true;
+  }else{
+    return false;
+  }
+}
+
+void startUpISR(){
+  startPushed = true;
+}
+
+void printStateChange(String state, tmElements_t tm){
+  String stateChangeMessage = "The state has changed to: ";
+  RTC.read(tm);
+  String hour = String(tm.Hour);
+  String minutes = String(tm.Minute);
+  String seconds = String(tm.Second);
+  String day = String(tm.Day);
+  String month = String(tm.Month);
+  String year = String(tmYearToCalendar(tm.Year));
+
+  //Print the hour
+  for(int i = 0; i < hour.length(); i++){
+    U0putchar(hour[i]);
+  }
+  U0putchar(':');
+  //Print Minutes
+  for(int i = 0; i < minutes.length(); i++){
+    U0putchar(minutes[i]);
+  }
+  U0putchar(':');
+  //Print Seconds
+  for(int i = 0; i < seconds.length(); i++){
+    U0putchar(seconds[i]);
+  }
+  U0putchar(' ');
+  //Print Month
+  for(int i = 0; i < month.length(); i++){
+    U0putchar(month[i]);
+  }
+  U0putchar('/');
+  //Print Day
+  for(int i = 0; i < day.length(); i++){
+    U0putchar(day[i]);
+  }
+  U0putchar('/');
+  //Print Year
+  for(int i = 0; i < year.length(); i++){
+    U0putchar(year[i]);
+  }
+  U0putchar(' ');
+  //Print State Change Message
+  for(int i = 0; i < stateChangeMessage.length(); i++){
+    U0putchar(stateChangeMessage[i]);
+  }
+  for(int i = 0; i < state.length(); i++){
+    U0putchar(state[i]);
+  }
+  //New Line
+  U0putchar('\n');
+}
+
+bool isStateChange(String& currState, String& previousState){
+  if(currState != previousState){
+    previousState = currState;
+    return true;
+  }
+  return false;
 }
