@@ -4,6 +4,10 @@
 //----Libraries----
 #include <LiquidCrystal.h>
 #include <dht.h>
+#include <Stepper.h>
+#include <Wire.h>
+#include <TimeLib.h>
+#include <DS1307RTC.h>
 
 //----My Pins----
 // --Outputs--
