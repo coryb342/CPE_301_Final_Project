@@ -60,18 +60,46 @@ volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
  volatile unsigned int  *myUBRR0  = (unsigned int *) 0x00C4;
  volatile unsigned char *myUDR0   = (unsigned char *)0x00C6;
 
+string state = "disabled";
+string previousState = "disabled";
 void setup() {
   //Initialize Serial Port
   U0init(9600);
-  
   //Set all LEDs to Output Mode
-  *port_b |= 11110000;
+  *port_b |= 0b11110000;
+  //Set all Buttons as Inputs
+  *port_e &= 0b11001111;
+  *port_d &= 0b11110111;
+  //Set up LCD
+  lcd.begin(16, 2);
+  lcd.setCursor(0, 0);
+
+
 }
 
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Starts in disabled mode
+  //Disabled Mode = yellow led on. No display, no fan. 
+  // Wait for start button via ISR, Switch to Idle mode. 
+  //Idle mode:
+  //-Green LED on
+  //Check for the temp
+  //Check for the water level. If low go to Error state.
+  //if temp is higher than threshold, transition to Run state.
+  //if stop button pressed, go back to disabled.
+  //Run Mode:
+  //Blue LED on.
+  //if temp is good, go back to idle
+  //if water is low, go to error
+  //if stop button pressed, go to disabled.
+  //Error Mode:
+  //Display error message that water is too low.
+  //Red LED on.
+  //Reset button pressed goes to Idle Mode.
+  //Stop button pressed goes to disabled mode. 
+
 
 }
 
