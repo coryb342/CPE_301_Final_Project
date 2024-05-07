@@ -17,8 +17,29 @@ volatile unsigned char* ddr_b  = (unsigned char*) 0x24;
 volatile unsigned char* pin_b  = (unsigned char*) 0x23; 
 
 //  -Motors- 
+//Stepper
+//Fan
 
 
+// --Inputs--
+//  -Buttons-
+//Start (Digital pin 2, PE4)
+//Stop (Digital pin 3, PE5)
+//Reset (Digital pin 18, PD3)
+volatile unsigned char* port_e = (unsigned char*) 0x2E; 
+volatile unsigned char* ddr_e  = (unsigned char*) 0x2D; 
+volatile unsigned char* pin_e  = (unsigned char*) 0x2C; 
+
+volatile unsigned char* port_d = (unsigned char*) 0x2B; 
+volatile unsigned char* ddr_d  = (unsigned char*) 0x2A; 
+volatile unsigned char* pin_d  = (unsigned char*) 0x29; 
+//  -Temp/Humidity-
+dht DHT;
+#define DHT11_PIN 22
+
+// --LCD Pins--
+const int RS = 4, EN = 5, D4 = 6, D5 = 7, D6 = 8, D7 = 9;
+LiquidCrystal lcd(RS, EN, D4, D5, D6, D7);
 
 
 //My Delay Params
