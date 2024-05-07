@@ -1,6 +1,10 @@
 //Cory Bateman
 //Final Project
 
+//----Libraries----
+#include <LiquidCrystal.h>
+#include <dht.h>
+
 //----My Pins----
 // --Outputs--
 //  -LEDS-
