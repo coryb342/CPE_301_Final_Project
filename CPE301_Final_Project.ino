@@ -67,7 +67,6 @@ volatile unsigned char *myTIMSK1 = (unsigned char *) 0x6F;
 volatile unsigned int  *myTCNT1  = (unsigned  int *) 0x84;
 volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
 
-
 //Serial Params
  #define RDA 0x80
  #define TBE 0x20  
@@ -77,11 +76,33 @@ volatile unsigned char *myTIFR1 =  (unsigned char *) 0x36;
  volatile unsigned int  *myUBRR0  = (unsigned int *) 0x00C4;
  volatile unsigned char *myUDR0   = (unsigned char *)0x00C6;
 
-string state = "disabled";
-string previousState = "disabled";
+ //ADC Params
+volatile unsigned char* my_ADMUX = (unsigned char*) 0x7C;
+volatile unsigned char* my_ADCSRB = (unsigned char*) 0x7B;
+volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
+volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
+
+//Start States
+String state = "off";
+String previousState = "off";
+
+//1 min delay setup
+unsigned long previousMillis = 0;
+const long interval = 60000;
+
+//Starting Temp and Humidity
+int temp = 0;
+int humidity = 0;
+
+//Start Button State
+bool startPushed = false;
+
+
 void setup() {
   //Initialize Serial Port
   U0init(9600);
+  //Initialize ADC
+  adc_init();
   //Set all LEDs to Output Mode
   *port_b |= 0b11110000;
   //Set all Buttons as Inputs
@@ -168,8 +189,40 @@ void U0putchar(unsigned char U0pdata)
   *myUDR0 = U0pdata;
 }
 
-//Helper Functions
+//ADC Functions
+void adc_init()
+{
+  // setup the A register
+  *my_ADCSRA |= 0b10000000; 
+  *my_ADCSRA &= 0b11011111; 
+  *my_ADCSRA &= 0b11110111; 
+  *my_ADCSRA &= 0b11111000; 
+  // setup the B register
+  *my_ADCSRB &= 0b11110111; 
+  *my_ADCSRB &= 0b11111000; 
+  // setup the MUX Register
+  *my_ADMUX  &= 0b01111111; 
+  *my_ADMUX  |= 0b01000000; 
+  *my_ADMUX  &= 0b11011111; 
+  *my_ADMUX  &= 0b11100000; 
+}
 
+unsigned int adc_read(unsigned char adc_channel_num)
+{
+  *my_ADMUX  &= 0b11100000;
+  *my_ADCSRB &= 0b11110111;
+  if(adc_channel_num > 7)
+  {
+    adc_channel_num -= 8;
+    *my_ADCSRB |= 0b00001000;
+  }
+  *my_ADMUX  += adc_channel_num;
+  *my_ADCSRA |= 0x40;
+  while((*my_ADCSRA & 0x40) != 0);
+  return *my_ADC_DATA;
+}
+
+//Helper Functions
 void printTempAndHumidityToLcd(int DHTpin, LiquidCrystal lcd){
   int chk = DHT.read11(DHTpin);
   lcd.clear();
