@@ -106,43 +106,107 @@ void setup() {
   //Initialize ADC
   adc_init();
   //Set all LEDs to Output Mode
-  *port_b |= 0b11110000;
+  *ddr_b |= 0b11110000;
   //Set all Buttons as Inputs
-  *port_e &= 0b11001111;
-  *port_d &= 0b11110111;
+  *ddr_e &= 0b11001111;
+  *ddr_d &= 0b11110111;
   //Set up LCD
   lcd.begin(16, 2);
   lcd.setCursor(0, 0);
   //Set Fan Motor pin to Output
-  *port_l |= 0b01000000;
+  *ddr_l |= 0b01000000;
   //Set up AttachInterrupt
   attachInterrupt(digitalPinToInterrupt(2), startUpISR, HIGH);
+  //Set initial Temp and Humidity.
+  int chk = DHT.read(DHT11_PIN);
+  temp = DHT.temperature;
+  humidity = DHT.humidity;
+  //Set up vent position.
+  ventCurrentPosition = adc_read(potentiometer);
 }
 
 
 
 void loop() {
-  // Starts in off mode
-  //Disabled Mode = yellow led on. No display, no fan. 
-  // Wait for start button via ISR, Switch to Idle mode. 
-  //Idle mode:
-  //-Green LED on
-  //Check for the temp
-  //Check for the water level. If low go to Error state.
-  //if temp is higher than threshold, transition to Run state.
-  //if stop button pressed, go back to disabled.
-  //Run Mode:
-  //Blue LED on.
-  //if temp is good, go back to idle
-  //if water is low, go to error
-  //if stop button pressed, go to disabled.
-  //Error Mode:
-  //Display error message that water is too low.
-  //Red LED on.
-  //Reset button pressed goes to Idle Mode.
-  //Stop button pressed goes to disabled mode. 
+  while(!startPushed){
+    //Disabled Mode
+    *port_b |= 0x01000000; // Yellow LED on, All others off.
+    *port_b &= ~(0x01 << 7);
+    *port_b &= ~(0x01 << 5);
+    *port_b &= ~(0x01 << 4);
+    *port_l &= ~(0x01 << 6); // Make sure fan is off.
+    lcd.clear(); // No LCD display.
+    lcd.setCursor(0, 0);
+  }
+  tmElements_t tm;
+  printTempAndHumidityToLcd();
 
+  if(isStateChange()){
+    printStateChange(state, tm);
+  }
 
+  if(state = "idle"){
+    *port_b |= 0x10000000;
+    *port_b &= ~(0x01 << 6);
+    *port_b &= ~(0x01 << 5);
+    *port_b &= ~(0x01 << 4);
+
+    *port_l &= ~(0x01 << 6);
+    
+    if(temp >= 23){
+      state = "run";
+    }
+    //Stop from Idle
+    if(*pin_e & 0b00100000){
+      startPushed = false;
+    }
+  }
+
+  if(state = "run"){
+    *port_b |= 0x00010000;
+    *port_b &= ~(0x01 << 6);
+    *port_b &= ~(0x01 << 5);
+    *port_b &= ~(0x01 << 7);
+
+    *port_l |= 0x01000000;
+    
+    if(temp < 23){
+      state = "idle";
+    }
+    //Stop from Run
+    if(*pin_e & 0b00100000){
+      startPushed = false;
+    }
+  }
+
+  if(state = "error"){
+    *port_b |= 0x00100000;
+    *port_b &= ~(0x01 << 6);
+    *port_b &= ~(0x01 << 4);
+    *port_b &= ~(0x01 << 7);
+
+    *port_l &= ~(0x01 << 6); // Make sure fan is off.
+    printErrorToLcd();
+    //Stop from Error
+    if(!isWaterLow() && (*pin_e & 0b00100000)){
+      startPushed = false;
+    }
+    //Reset from Error
+    if(!isWaterLow() && (*pin_d & 0b00001000)){
+      state = "idle";
+    }
+  }
+  if(isMoveVent()){
+    printStateChange("Vent Moved", tm);
+  }
+
+  if(isWaterLow()){
+    state = "error";
+  }
+
+  if(isTimeToUpdate()){
+    updateTempAndHumidity();
+  }
 }
 
 //Delay Function
