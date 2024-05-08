@@ -25,6 +25,8 @@ volatile unsigned char* pin_b  = (unsigned char*) 0x23;
 //Stepper (Digital pins 47, 49, 51, 53)
 const int stepsPerRevolution = 2038;
 Stepper vent = Stepper(stepsPerRevolution, 47, 49, 51, 53);
+int ventCurrentPosition;
+
 
 //Fan (Digital Pin 43, PL6)
 volatile unsigned char* port_l = (unsigned char*) 0x10B; 
@@ -83,8 +85,8 @@ volatile unsigned char* my_ADCSRA = (unsigned char*) 0x7A;
 volatile unsigned int* my_ADC_DATA = (unsigned int*) 0x78;
 
 //Start States
-String state = "off";
-String previousState = "off";
+String state = "disabled";
+String previousState = "disabled";
 
 //1 min delay setup
 unsigned long previousMillis = 0;
@@ -321,16 +323,16 @@ void printStateChange(String state, tmElements_t tm){
   for(int i = 0; i < stateChangeMessage.length(); i++){
     U0putchar(stateChangeMessage[i]);
   }
-  for(int i = 0; i < state.length(); i++){
-    U0putchar(state[i]);
+  for(int i = 0; i < newState.length(); i++){
+    U0putchar(newState[i]);
   }
   //New Line
   U0putchar('\n');
 }
 
-bool isStateChange(String& currState, String& previousState){
-  if(currState != previousState){
-    previousState = currState;
+bool isStateChange(){
+  if(state != previousState){
+    previousState = state;
     return true;
   }
   return false;
