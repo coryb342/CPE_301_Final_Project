@@ -284,8 +284,8 @@ unsigned int adc_read(unsigned char adc_channel_num)
 }
 
 //Helper Functions
-void printTempAndHumidityToLcd(int DHTpin, LiquidCrystal lcd){
-  int chk = DHT.read11(DHTpin);
+void printTempAndHumidityToLcd(){
+  int chk = DHT.read11(DHT11_PIN);
   lcd.clear();
   lcd.setCursor(0,0); 
   lcd.print("Temp: ");
@@ -298,39 +298,39 @@ void printTempAndHumidityToLcd(int DHTpin, LiquidCrystal lcd){
   lcd.print("%");
 }
 
-void updateTempAndHumidity(int DHTpin, int& temp, int& humidity){
-  int chk = DHT.read(DHTpin);
+void updateTempAndHumidity(){
+  int chk = DHT.read(DHT11_PIN);
   temp = DHT.temperature;
   humidity = DHT.humidity;
 }
 
-void moveVent(int analogPin, int currentPosition, Stepper vent){
-  
-  if(adc_read(analogPin) < currentPosition){
+bool isMoveVent(){
+  if(adc_read(potentiometer) < ventCurrentPosition){
     vent.step(-100);
-    return;
-  }else if(adc_read(analogPin) > currentPosition){
+    return true;
+  }else if(adc_read(potentiometer) > ventCurrentPosition){
     vent.step(100);
-    return;
+    return true;
   }else{
-    return;
+    return false;
   }
 }
 
-bool isWaterLow(int analogPin){
-  if(adc_read(analogPin) < 300){
+bool isWaterLow(){
+  if(adc_read(waterLevel) < 300){
     return true;
   }
   return false;
 }
 
-void printErrorToLcd(LiquidCrystal lcd){
+void printErrorToLcd(){
   lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Water Level Low!");
 }
 
-bool isTimeToUpdate(long currMillis, long& previousMillis, long interval){
+bool isTimeToUpdate(){
+  int currMillis = millis();
   if(currMillis - previousMillis >= interval){
     previousMillis = currMillis;
     return true;
@@ -341,9 +341,13 @@ bool isTimeToUpdate(long currMillis, long& previousMillis, long interval){
 
 void startUpISR(){
   startPushed = true;
+  tmElements_t tm;
+  state = "idle";
+  printStateChange(state, tm);
+  previousState = state;
 }
 
-void printStateChange(String state, tmElements_t tm){
+void printStateChange(String newState, tmElements_t tm){
   String stateChangeMessage = "The state has changed to: ";
   RTC.read(tm);
   String hour = String(tm.Hour);
