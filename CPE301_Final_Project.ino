@@ -34,22 +34,22 @@ volatile unsigned char* pin_l  = (unsigned char*) 0x109;
 
 // --Inputs--
 
-//Start (Digital pin 2, PE4)
+//Reset (Digital pin 2, PE4)
 //Stop (Digital pin 3, PE5)
 volatile unsigned char* port_e = (unsigned char*) 0x2E; 
 volatile unsigned char* ddr_e  = (unsigned char*) 0x2D; 
 volatile unsigned char* pin_e  = (unsigned char*) 0x2C; 
 
-//Reset (Digital pin 18, PD3)
+//Start (Digital pin 18, PD3)
 volatile unsigned char* port_d = (unsigned char*) 0x2B; 
 volatile unsigned char* ddr_d  = (unsigned char*) 0x2A; 
 volatile unsigned char* pin_d  = (unsigned char*) 0x29;
 
-//Potentiometer (Analog pin 0, A0)
-const int potentiometer = 0;
+//Move vent left(Digital pin 44, PL5)
+//Move vent right(Digital pin 46, PL3)
 
-//Water Level Sensor (Analog pin 1, A1)
-const int waterLevel = 1;
+//Water Level Sensor (Analog pin 0, A0)
+const int waterLevel = 0;
 
 //  -Temp/Humidity-
 dht DHT;
@@ -297,17 +297,16 @@ void printTempAndHumidityToLcd(){
 }
 
 void updateTempAndHumidity(){
-  int chk = DHT.read(DHT11_PIN);
   temp = DHT.temperature;
   humidity = DHT.humidity;
 }
 
 bool isMoveVent(){
-  if(adc_read(potentiometer) < ventCurrentPosition){
-    vent.step(-100);
+  if(*pin_l & (0x01 << 3)){
+    vent.step(500);
     return true;
-  }else if(adc_read(potentiometer) > ventCurrentPosition){
-    vent.step(100);
+  }else if(*pin_l & 0x01 << 5){
+    vent.step(-500);
     return true;
   }else{
     return false;
@@ -315,7 +314,7 @@ bool isMoveVent(){
 }
 
 bool isWaterLow(){
-  if(adc_read(waterLevel) < 300){
+  if(adc_read(0) < 100){
     return true;
   }
   return false;
