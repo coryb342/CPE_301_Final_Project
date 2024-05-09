@@ -350,14 +350,10 @@ bool isTimeToUpdate(){
 
 void startUpISR(){
   startPushed = true;
-  tmElements_t tm;
   state = "idle";
-  printStateChange(state, tm);
-  previousState = state;
 }
 
-void printStateChange(String newState, tmElements_t tm){
-  String stateChangeMessage = "The state has changed to: ";
+void printEventMessage(String newState, tmElements_t tm, String eventMessage){
   RTC.read(tm);
   String hour = String(tm.Hour);
   String minutes = String(tm.Minute);
@@ -396,12 +392,14 @@ void printStateChange(String newState, tmElements_t tm){
     U0putchar(year[i]);
   }
   U0putchar(' ');
-  //Print State Change Message
-  for(int i = 0; i < stateChangeMessage.length(); i++){
-    U0putchar(stateChangeMessage[i]);
+  //Print Event Message
+  for(int i = 0; i < eventMessage.length(); i++){
+    U0putchar(eventMessage[i]);
   }
-  for(int i = 0; i < newState.length(); i++){
-    U0putchar(newState[i]);
+  if(eventMessage == stateChangeMessage){
+    for(int i = 0; i < newState.length(); i++){
+      U0putchar(newState[i]);
+    }
   }
   //New Line
   U0putchar('\n');
