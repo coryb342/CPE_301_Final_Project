@@ -27,7 +27,6 @@ const int stepsPerRevolution = 2038;
 Stepper vent = Stepper(stepsPerRevolution, 47, 49, 51, 53);
 int ventCurrentPosition;
 
-
 //Fan (Digital Pin 43, PL6)
 volatile unsigned char* port_l = (unsigned char*) 0x10B; 
 volatile unsigned char* ddr_l  = (unsigned char*) 0x10A; 
@@ -59,7 +58,6 @@ dht DHT;
 // --LCD Pins--
 const int RS = 4, EN = 5, D4 = 6, D5 = 7, D6 = 8, D7 = 9;
 LiquidCrystal lcd(RS, EN, D4, D5, D6, D7);
-
 
 //My Delay Params
 volatile unsigned char *myTCCR1A = (unsigned char *) 0x80;
