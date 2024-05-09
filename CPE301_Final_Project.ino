@@ -91,12 +91,17 @@ unsigned long previousMillis = 0;
 const long interval = 60000;
 
 //Starting Temp and Humidity
-int temp = 0;
-int humidity = 0;
+float temp = 0.00;
+float humidity = 0.00;
+const float tooHot = 28.00;
 
 //Start Button State
-bool startPushed = false;
+volatile bool startPushed = false;
+const int interruptPin = 18;
 
+//Event Messages:
+String stateChangeMessage = "The state has changed to: ";
+String ventMoveMessage = "The vent has moved.";
 
 void setup() {
   //Initialize Serial Port
